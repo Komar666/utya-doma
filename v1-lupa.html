@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Утя Дома — hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #12275a;
+    --ink: #1b2b4b;
+    --muted: #4a5875;
+    --yellow: #f6c21c;
+    --yellow-soft: #ffe27a;
+    --teal: #1e8a8c;
+    --blue: #0e5bc4;
+    --bg-warm: #fff7df;
+    --bg-cool: #eaf1fd;
+    --card: #ffffff;
+    --line: rgba(18, 39, 90, .10);
+    --nav-h: 84px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { font-family: Inter, system-ui, sans-serif; color: var(--ink); background: #fff; overflow-x: hidden; }
+  body.loading .nav, body.loading .hero-inner, body.loading .scroll-hint { opacity: 0; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- шапка ---------- */
+  .nav {
+    position: fixed; inset: 0 0 auto 0; z-index: 50; height: var(--nav-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(16px, 3vw, 44px);
+    background: rgba(255, 255, 255, .72); backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav img { height: 56px; width: auto; }
+  .nav ul { display: flex; gap: clamp(16px, 2.4vw, 40px); list-style: none; font-size: 15px; color: var(--ink); }
+  .nav ul a { position: relative; }
+  .nav ul a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; background: var(--yellow); transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+  .nav ul a:hover::after { transform: scaleX(1); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; font: 700 16px/1 Manrope, sans-serif; border-radius: 14px; padding: 17px 24px; cursor: pointer; border: 0; will-change: transform; }
+  .btn-yellow { background: var(--yellow); color: var(--navy); box-shadow: 0 8px 24px -10px rgba(246, 194, 28, .9); }
+  .btn-blue { background: var(--blue); color: #fff; border-radius: 999px; width: 100%; padding: 18px; box-shadow: 0 14px 30px -12px rgba(14, 91, 196, .8); }
+  .btn span { pointer-events: none; }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; height: 100vh; min-height: 680px; overflow: hidden; background: #fff; }
+  .hero-bg { position: absolute; inset: 0; background: linear-gradient(115deg, var(--bg-warm) 0%, #fbf9f4 42%, var(--bg-cool) 100%); }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .7; }
+  .b1 { width: 46vw; height: 46vw; left: -12vw; top: -18vw; background: radial-gradient(circle, #ffe7a0, transparent 65%); }
+  .b2 { width: 50vw; height: 50vw; right: -14vw; bottom: -22vw; background: radial-gradient(circle, #cfe0ff, transparent 65%); }
+  .grain { position: absolute; inset: 0; opacity: .05; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  .hero-inner {
+    position: relative; height: 100%; max-width: 1320px; margin: 0 auto;
+    padding: calc(var(--nav-h) + 20px) clamp(16px, 4vw, 60px) 40px;
+    display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); align-items: center; gap: 20px;
+  }
+
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; font: 600 14px/1 Inter, sans-serif; color: #6b4d00; background: rgba(255, 226, 122, .55); border: 1px solid rgba(246, 194, 28, .55); }
+  .badge-duck { display: inline-block; transform-origin: 50% 80%; }
+
+  .title { margin: 22px 0 22px; font: 800 clamp(38px, 4.3vw, 66px)/1.04 Manrope, sans-serif; letter-spacing: -.025em; color: var(--navy); }
+  .title .line { display: block; }
+  .title .accent { color: var(--yellow); position: relative; width: fit-content; }
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .06em .02em .1em; margin: -.06em -.02em -.1em; }
+  .wi { display: inline-block; will-change: transform, filter; }
+  .swoosh { position: absolute; left: -2%; bottom: -.24em; width: 104%; height: .42em; overflow: visible; z-index: -1; }
+  .swoosh path { fill: none; stroke: var(--yellow-soft); stroke-width: 14; stroke-linecap: round; opacity: .75; }
+
+  .lead { max-width: 560px; font-size: clamp(16px, 1.35vw, 20px); line-height: 1.5; color: var(--muted); }
+  .lead .wi { will-change: opacity, filter; }
+
+  .perks { list-style: none; margin-top: 34px; display: grid; gap: 14px; }
+  .perks li { display: flex; align-items: center; gap: 14px; font-size: clamp(16px, 1.3vw, 19px); color: var(--ink); }
+  .perks .ic { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--teal); color: #fff; box-shadow: 0 8px 18px -8px rgba(30, 138, 140, .8); }
+  .perks .ic svg { width: 22px; height: 22px; }
+
+  /* ---------- сцена с Утей ---------- */
+  .stage { position: relative; height: 100%; min-height: 0; display: flex; align-items: center; justify-content: flex-end; }
+  .rig-wrap { position: relative; width: min(560px, 42vw, calc(100vh - 190px)); perspective: 1200px; margin-top: 40px; }
+  .rig { position: relative; width: 100%; aspect-ratio: 1; transform-style: preserve-3d; }
+  .duck { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; user-select: none; -webkit-user-drag: none; }
+  .floor { position: absolute; left: 22%; right: 16%; bottom: 1%; height: 6%; border-radius: 50%; background: radial-gradient(closest-side, rgba(18, 39, 90, .28), transparent); filter: blur(6px); z-index: 0; }
+  .orbit { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 0; pointer-events: none; }
+  .orbit ellipse { fill: none; stroke: var(--navy); stroke-opacity: .13; stroke-width: 1.5; stroke-dasharray: 3 7; }
+
+  .obj { position: absolute; left: 0; top: 0; will-change: transform, opacity, filter; pointer-events: none; }
+  .obj img { width: 100%; height: auto; filter: drop-shadow(0 10px 14px rgba(18, 39, 90, .22)); }
+  .obj.back { z-index: 1; }
+  .obj.front { z-index: 4; }
+  .check { position: absolute; right: -4%; top: -4%; width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 3px #fff, 0 6px 14px -4px rgba(30,138,140,.8); transform: scale(0); transition: transform .45s cubic-bezier(.34,1.8,.5,1); }
+  .check svg { width: 14px; height: 14px; }
+  .obj.found .check { transform: scale(1); }
+
+  .lens { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+  .lens > * { position: absolute; }
+  .glass { border-radius: 50%; background: radial-gradient(circle at 38% 30%, #ffffff 0%, #eef3fa 45%, #d6dfeb 100%); box-shadow: inset 0 0 18px rgba(30, 50, 90, .35); }
+  .lens-objs { inset: 0; }
+  .lens-obj { position: absolute; left: 0; top: 0; will-change: transform; }
+  .lens-obj img { width: 100%; height: auto; }
+  .glare { border-radius: 50%; background: radial-gradient(ellipse 60% 35% at 32% 18%, rgba(255,255,255,.95), transparent 70%), radial-gradient(ellipse 80% 50% at 70% 95%, rgba(255,255,255,.35), transparent 70%); }
+
+  /* строка поиска */
+  .search { position: absolute; left: 56px; top: calc(50% - min(280px, 21vw, calc(50vh - 95px)) - 4px); z-index: 6; width: min(380px, 27vw); padding: 14px 16px; border-radius: 20px; background: rgba(255, 255, 255, .86); backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 20px 40px -24px rgba(18, 39, 90, .45); }
+  .search-row { display: flex; align-items: center; gap: 10px; }
+  .search-row > svg { flex: none; width: 20px; height: 20px; color: var(--navy); }
+  .query { font: 700 16px/1.25 Manrope, sans-serif; color: var(--navy); min-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .query.placeholder { color: #9aa5ba; font-weight: 600; }
+  .caret { display: inline-block; width: 2px; height: 1.05em; background: var(--navy); vertical-align: -3px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .status { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .status-text { display: flex; align-items: center; gap: 7px; }
+  .status.ok .status-text { color: var(--teal); font-weight: 600; }
+  .spinner { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(18,39,90,.2); border-top-color: var(--navy); animation: spin .7s linear infinite; }
+  .status.ok .spinner, .status.idle .spinner { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(18, 39, 90, .14); transition: background .3s, transform .3s; }
+  .dots i.on { background: var(--yellow); transform: scale(1.15); }
+
+  /* карточка скидки */
+  .offer { position: absolute; right: -8px; bottom: calc(50% - min(280px, 21vw, calc(50vh - 95px)) + 10px); z-index: 7; width: min(260px, 21vw); }
+  .offer-card { background: var(--card); border-radius: 26px; padding: 26px 22px 24px; text-align: center; box-shadow: 0 30px 60px -28px rgba(18, 39, 90, .5); margin-bottom: 12px; }
+  .offer-card .t1 { font: 700 clamp(24px, 2.4vw, 36px)/1 Manrope, sans-serif; color: var(--ink); }
+  .offer-card .t2 { font: 800 italic clamp(44px, 4.6vw, 66px)/1.05 Manrope, sans-serif; color: var(--teal); letter-spacing: -.02em; margin: 6px 0 4px; }
+  .offer-card .t3 { font: 700 clamp(18px, 1.9vw, 28px)/1.12 Manrope, sans-serif; color: var(--ink); }
+
+  .scroll-hint { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 8; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); padding: 8px 14px 8px 10px; border-radius: 999px; background: rgba(255,255,255,.7); backdrop-filter: blur(8px); border: 1px solid var(--line); }
+  .mouse { width: 18px; height: 28px; border: 2px solid var(--navy); border-radius: 10px; position: relative; }
+  .mouse::after { content: ""; position: absolute; left: 50%; top: 5px; width: 3px; height: 6px; margin-left: -1.5px; border-radius: 2px; background: var(--navy); animation: wheel 1.6s cubic-bezier(.6,0,.4,1) infinite; }
+  @keyframes wheel { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(8px); opacity: 0; } 100% { opacity: 0; } }
+
+  /* следующая секция — чтобы было видно, как hero «отпускает» */
+  .next { position: relative; z-index: 2; background: #fff; padding: 110px clamp(16px, 4vw, 60px) 140px; text-align: center; }
+  .eyebrow { font: 700 13px/1 Inter, sans-serif; letter-spacing: .14em; color: var(--blue); }
+  .next h2 { font: 800 clamp(34px, 4vw, 56px)/1.1 Manrope, sans-serif; color: var(--navy); margin: 22px 0 16px; }
+  .next p.sub { max-width: 660px; margin: 0 auto; font-size: 19px; line-height: 1.5; color: var(--muted); }
+  .cards { max-width: 1110px; margin: 56px auto 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; text-align: center; }
+  .cards div { border: 1px solid var(--line); border-radius: 22px; padding: 28px 20px; }
+  .cards h3 { font: 700 19px/1.2 Manrope, sans-serif; color: var(--navy); margin-bottom: 10px; }
+  .cards p { font-size: 14px; line-height: 1.45; color: var(--muted); }
+
+  /* ---------- мобильная версия ---------- */
+  @media (max-width: 900px) {
+    :root { --nav-h: 68px; }
+    .nav img { height: 44px; }
+    .nav ul { display: none; }
+    .nav .btn { padding: 13px 16px; font-size: 14px; }
+    .hero { height: auto; min-height: 0; }
+    .hero-inner { grid-template-columns: 1fr; padding-top: calc(var(--nav-h) + 28px); padding-bottom: 60px; gap: 8px; }
+    .stage { height: auto; flex-direction: column; align-items: stretch; }
+    .search { position: relative; top: auto; left: auto; width: 100%; margin-top: 24px; }
+    .rig-wrap { width: min(92vw, 440px); margin: 10px auto 0; }
+    .offer { position: relative; right: auto; bottom: auto; width: 100%; margin-top: -10px; }
+    .offer-card .t1 { font-size: 26px; } .offer-card .t2 { font-size: 54px; } .offer-card .t3 { font-size: 22px; }
+    .scroll-hint { display: none; }
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) { .cards { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="loading">
+
+<header class="nav">
+  <a href="#"><img src="assets/logo.webp" alt="Утя Дома"></a>
+  <ul>
+    <li><a href="#next">Преимущества</a></li>
+    <li><a href="#">Как мы работаем</a></li>
+    <li><a href="#">Услуги</a></li>
+    <li><a href="#">Специалисты</a></li>
+    <li><a href="#">Контакты</a></li>
+  </ul>
+  <a class="btn btn-yellow magnetic" href="#"><span>Получить консультацию</span></a>
+</header>
+
+<section class="hero" id="hero">
+  <div class="hero-bg"><div class="blob b1"></div><div class="blob b2"></div><div class="grain"></div></div>
+
+  <div class="hero-inner">
+    <div class="copy">
+      <span class="badge"><span class="badge-duck">🦆</span>Эксперты под одной крышей</span>
+      <h1 class="title">
+        <span class="line split">Нужный специалист</span>
+        <span class="line split">под вашу задачу —</span>
+        <span class="line accent"><span class="split">за один запрос</span><svg class="swoosh" viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M6 28 C 90 12, 210 8, 394 20"/></svg></span>
+      </h1>
+      <p class="lead split">Решаем юридические, финансовые и бизнес-задачи через подбор профильных экспертов в одном месте. Онлайн, быстро, надёжно.</p>
+      <ul class="perks">
+        <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8 6.5h8M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span>Подбор профильных экспертов</li>
+        <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7z"/><path d="M3.5 7 12 11.5 20.5 7M12 11.5v10"/></svg></span>Комплексное сопровождение</li>
+        <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5.5h4V20"/></svg></span>Работаем дистанционно</li>
+      </ul>
+    </div>
+
+    <div class="stage">
+      <div class="search" aria-live="polite">
+        <div class="search-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>
+          <div class="query placeholder"><span class="qtext">Опишите задачу…</span><span class="caret"></span></div>
+        </div>
+        <div class="status idle">
+          <span class="status-text"><span class="spinner"></span><span class="stext">Утя готова искать</span></span>
+          <span class="dots"></span>
+        </div>
+      </div>
+
+      <div class="rig-wrap">
+        <div class="rig">
+          <div class="floor"></div>
+          <svg class="orbit"><ellipse/></svg>
+          <img class="duck" src="assets/duck.webp" alt="Утя с лупой">
+          <div class="lens"><div class="glass"></div><div class="lens-objs"></div><div class="glare"></div></div>
+        </div>
+      </div>
+
+      <div class="offer">
+        <div class="offer-card">
+          <div class="t1">Скидка</div>
+          <div class="t2">-20%</div>
+          <div class="t3">для новых<br>клиентов</div>
+        </div>
+        <a class="btn btn-blue magnetic" href="#"><span>Оставить заявку</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint"><span class="mouse"></span>Листайте — Утя ищет специалиста</div>
+</section>
+
+<section class="next" id="next">
+  <div class="eyebrow">ПОЧЕМУ «УТЯ_ДОМА»</div>
+  <h2>Наши преимущества</h2>
+  <p class="sub">Мы создали удобный формат работы, чтобы вы тратили время на бизнес, а не на поиск специалистов.</p>
+  <div class="cards">
+    <div><h3>Один вход — все задачи</h3><p>Не нужно искать разных специалистов. Мы подбираем эксперта под вашу задачу.</p></div>
+    <div><h3>Проверенные специалисты</h3><p>Все эксперты проходят верификацию. Только практикующие профессионалы.</p></div>
+    <div><h3>Комплексный подход</h3><p>Юридические, финансовые, IT и HR-задачи — в рамках одного агентства.</p></div>
+    <div><h3>Работаем онлайн</h3><p>Дистанционный формат без лишних встреч. Документы, консультации, сопровождение — всё онлайн.</p></div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Направления из каталога услуг: объект + что «печатается» в строке поиска
+  const SERVICES = [
+    { img: 'law',   q: 'Юридические услуги',             size: 1.0 },
+    { img: 'tax',   q: 'Финансы и налоги',               size: 1.0 },
+    { img: 'biz',   q: 'Бизнес-консалтинг',              size: 0.95 },
+    { img: 'ip',    q: 'Интеллектуальная собственность', size: 1.0 },
+    { img: 'grant', q: 'Гранты и субсидии',              size: 1.2 },
+    { img: 'hr',    q: 'Кадры',                          size: 1.05 },
+    { img: 'it',    q: 'IT и цифровизация',              size: 1.0 },
+  ];
+  const N = SERVICES.length, STEP = Math.PI * 2 / N;
+
+  // Геометрия в долях ширины картинки Ути (измерено по утя_новая.png)
+  const LENS = { x: 0.2335, y: 0.364, a: 0.069, b: 0.104, rot: -17 };   // стекло лупы
+  const RING = { rx: 0.46, ry: 0.13, tilt: 16 };                         // орбита объектов
+  const MAG = 1.38;         // увеличение лупы
+  const BASE = 0.165;       // базовый размер объекта
+
+  const mobile = matchMedia('(max-width: 900px)').matches;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DEBUG_P = new URLSearchParams(location.search).get('p');   // ?p=0.5 — заморозить сцену на моменте скролла (для проверки)
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const rig = $('.rig'), lens = $('.lens'), lensObjs = $('.lens-objs'), glass = $('.glass'), glare = $('.glare');
+  const qEl = $('.query'), qText = $('.qtext'), status = $('.status'), sText = $('.stext'), dotsEl = $('.dots');
+  const offer = $('.offer');
+
+  // ---------- разбивка текста на слова ----------
+  document.querySelectorAll('.split').forEach(el => {
+    el.innerHTML = el.textContent.trim().split(/\s+/)
+      .map(w => `<span class="w"><span class="wi">${w}</span></span>`).join(' ');
+  });
+
+  // ---------- объекты ----------
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  const items = SERVICES.map(s => {
+    const src = `assets/${s.img}.webp`;
+    const back = document.createElement('div'); back.className = 'obj back'; back.innerHTML = `<img src="${src}" alt="">`;
+    const front = document.createElement('div'); front.className = 'obj front'; front.innerHTML = `<img src="${src}" alt=""><span class="check">${CHECK}</span>`;
+    const clone = document.createElement('div'); clone.className = 'lens-obj'; clone.innerHTML = `<img src="${src}" alt="">`;
+    rig.append(back, front); lensObjs.append(clone);
+    dotsEl.insertAdjacentHTML('beforeend', '<i></i>');
+    return { ...s, back, front, clone };
+  });
+  const dots = [...dotsEl.children];
+
+  // ---------- геометрия ----------
+  let W = 0, L, C, rx, ry, tilt;
+  const rot = (x, y, deg) => { const r = deg * Math.PI / 180, c = Math.cos(r), s = Math.sin(r); return [x * c - y * s, x * s + y * c]; };
+
+  function layout() {
+    W = rig.clientWidth;
+    L = { x: LENS.x * W, y: LENS.y * W };
+    rx = RING.rx * W; ry = RING.ry * W; tilt = RING.tilt;
+    const [ox, oy] = rot(rx, 0, tilt);
+    C = { x: L.x + ox, y: L.y + oy };      // крайняя левая точка орбиты = центр лупы
+
+    // стекло: наклонный эллипс -> clip-path
+    const a = LENS.a * W, b = LENS.b * W, pts = [];
+    for (let i = 0; i < 64; i++) {
+      const t = i / 64 * Math.PI * 2, [px, py] = rot(a * Math.cos(t), b * Math.sin(t), LENS.rot);
+      pts.push(`${(L.x + px).toFixed(1)}px ${(L.y + py).toFixed(1)}px`);
+    }
+    lens.style.clipPath = `polygon(${pts.join(',')})`;
+    for (const el of [glass, glare]) Object.assign(el.style, {
+      left: `${L.x - a}px`, top: `${L.y - b}px`, width: `${2 * a}px`, height: `${2 * b}px`, transform: `rotate(${LENS.rot}deg)`
+    });
+
+    const e = $('.orbit ellipse');
+    e.setAttribute('cx', C.x); e.setAttribute('cy', C.y); e.setAttribute('rx', rx); e.setAttribute('ry', ry);
+    e.setAttribute('transform', `rotate(${tilt} ${C.x} ${C.y})`);
+    for (const it of items) { const w = BASE * W * it.size; it.back.style.width = it.front.style.width = `${w}px`; it.clone.style.width = `${w * MAG}px`; }
+  }
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
+  const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  // ---------- кадр ----------
+  // s — позиция «конвейера»: объект i стоит в лупе при s = i
+  // fin — финал 0..1: объекты улетают в карточку скидки
+  function render(s, fin, foundFn) {
+    let target = null;
+    if (fin > 0) {
+      const ro = offer.getBoundingClientRect(), rr = rig.getBoundingClientRect(), k = rr.width / W;
+      target = { x: (ro.left + ro.width / 2 - rr.left) / k, y: (ro.top + ro.height * 0.3 - rr.top) / k };
+    }
+    items.forEach((it, i) => {
+      const th = Math.PI + (i - s) * STEP;
+      const [px, py] = rot(rx * Math.cos(th), ry * Math.sin(th), tilt);
+      let x = C.x + px, y = C.y + py;
+      const depth = Math.sin(th);                       // -1 сзади … +1 спереди
+      let sc = 0.8 + 0.25 * depth, op = 0.55 + 0.45 * (depth + 1) / 2;
+      if (target) {
+        const f = easeIO(clamp(fin * 1.7 - i * 0.04));
+        x += (target.x - x) * f; y += (target.y - y) * f; sc *= 1 - 0.75 * f; op *= 1 - smooth(0.55, 0.95, f);
+      }
+      const blur = Math.max(0, -depth) * 2.4;
+      const t = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${sc})`;
+      it.back.style.transform = it.front.style.transform = t;
+      it.back.style.opacity = op;
+      it.back.style.filter = blur > .1 ? `blur(${blur.toFixed(2)}px)` : 'none';
+      it.front.style.opacity = op * smooth(0.12, 0.5, depth);
+
+      // клон внутри лупы: увеличение вокруг центра стекла, всегда резкий
+      const mx = L.x + (x - L.x) * MAG, my = L.y + (y - L.y) * MAG;
+      it.clone.style.transform = `translate3d(${mx}px, ${my}px, 0) translate(-50%, -50%) scale(${sc})`;
+      it.clone.style.opacity = target ? op : 1;
+
+      const found = foundFn(i);
+      it.front.classList.toggle('found', found);
+      dots[i].classList.toggle('on', found);
+    });
+  }
+
+  // ---------- строка поиска ----------
+  let shownKey = null, typer = null;
+  function setSearch(key, query, stateText, state) {
+    if (key === shownKey) return;
+    shownKey = key;
+    status.className = `status ${state}`;
+    sText.textContent = stateText;
+    typer && typer.kill();
+    if (!query) { qEl.classList.add('placeholder'); qText.textContent = 'Опишите задачу…'; return; }
+    qEl.classList.remove('placeholder');
+    const o = { n: 0 };
+    typer = gsap.to(o, { n: query.length, duration: Math.min(0.9, query.length * 0.035), ease: 'none',
+      onUpdate: () => { qText.textContent = query.slice(0, Math.round(o.n)); } });
+  }
+  function updateSearch(s, fin) {
+    if (fin > 0.35) return setSearch('fin', 'Все направления', '✓ Под одной крышей', 'ok');
+    if (s < -0.15 || intro.spin > 0.05) return setSearch('idle', '', 'Утя готова искать', 'idle');
+    const k = ((Math.round(s) % N) + N) % N, near = Math.abs(s - Math.round(s)) < 0.12;
+    near ? setSearch(`ok${k}`, items[k].q, '✓ Эксперт найден', 'ok')
+         : setSearch(`go${k}`, items[k].q, 'Ищем…', 'go');
+  }
+
+  // ---------- интро ----------
+  const intro = { spin: 2.2 };   // орбита «докручивается» на место при загрузке
+  function playIntro() {
+    document.body.classList.remove('loading');
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    tl.from('.nav', { y: -24, opacity: 0, duration: 1 }, 0)
+      .from('.badge', { y: 18, opacity: 0, scale: .92, filter: 'blur(6px)', duration: 1 }, .1)
+      .from('.badge-duck', { rotate: -35, duration: 1.2, ease: 'elastic.out(1.2, .35)' }, .3)
+      .from('.title .wi', { yPercent: 115, rotate: 7, opacity: 0, filter: 'blur(10px)', duration: 1.3, stagger: .075 }, .2)
+      .from('.swoosh path', { strokeDashoffset: 420, strokeDasharray: 420, duration: 1.1, ease: 'power3.inOut' }, .95)
+      .from('.lead .wi', { y: 12, opacity: 0, filter: 'blur(6px)', duration: .9, stagger: .018 }, .7)
+      .from('.perks li', { x: -26, opacity: 0, duration: .9, stagger: .1 }, 1.05)
+      .from('.perks .ic', { scale: 0, rotate: -120, duration: .9, stagger: .1, ease: 'back.out(2.2)' }, 1.05)
+      .from('.rig-wrap', { y: 90, scale: .86, opacity: 0, duration: 1.5 }, .25)
+      .from('.floor', { scaleX: .3, opacity: 0, duration: 1.4 }, .45)
+      .from('.orbit', { opacity: 0, duration: 1.2 }, .9)
+      .to(intro, { spin: 0, duration: 2.2, ease: 'power3.out' }, .6)
+      .from('.search', { y: -14, opacity: 0, filter: 'blur(8px)', duration: 1 }, 1.0)
+      .from('.scroll-hint', { y: 12, opacity: 0, duration: .8 }, 1.6);
+    if (mobile || reduced) tl.from('.offer', { y: 30, opacity: 0, duration: 1 }, 1.2);
+    if (reduced || DEBUG_P !== null) tl.progress(1);
+
+    // Утя «дышит»
+    if (!reduced) gsap.to(rig, { y: -9, rotate: .6, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  }
+
+  // ---------- десктоп: скролл-сцена ----------
+  function desktop() {
+    const lenis = new Lenis({ lerp: 0.09 });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+
+    gsap.set(offer, { opacity: 0, scale: .5, rotate: -8, transformOrigin: '50% 60%' });
+    const P0 = 0.05, P1 = 0.82;      // вход · поиск · финал
+    let target = 0, cur = 0;
+    ScrollTrigger.create({ trigger: '#hero', start: 'top top', end: `+=${N * 420}`, pin: true, onUpdate: self => { target = self.progress; } });
+
+    const pulse = gsap.to('.offer .btn', { scale: 1.04, duration: .7, yoyo: true, repeat: -1, ease: 'sine.inOut', paused: true });
+    gsap.ticker.add(() => {
+      if (DEBUG_P !== null) target = cur = +DEBUG_P;
+      cur += (target - cur) * 0.14;
+      const p = cur;
+      let s;
+      if (p < P0) s = -0.5 + 0.5 * easeIO(p / P0);
+      else {
+        const u = clamp((p - P0) / (P1 - P0)) * N, k = Math.floor(u);
+        s = k >= N - 1 ? N - 1 : k + easeIO(clamp((u - k - 0.42) / 0.58));   // 42% шага объект «задерживается» в лупе
+      }
+      const fin = clamp((p - P1) / (1 - P1 - 0.03));
+      render(s + intro.spin, fin, i => p >= P0 * 0.9 && s >= i - 0.12);
+      updateSearch(s, fin);
+
+      const o = smooth(0.5, 0.9, fin), pop = gsap.parseEase("back.out(1.8)")(o);
+      gsap.set(offer, { opacity: smooth(0.5, 0.62, fin), scale: 0.5 + 0.5 * pop, rotate: -8 * (1 - o) });
+      o > 0.95 ? pulse.play() : pulse.pause(0);
+      gsap.set('.scroll-hint', { opacity: 1 - smooth(0.005, 0.04, p) });
+    });
+
+    // лёгкий 3D-наклон сцены за курсором
+    const rx = gsap.quickTo('.rig-wrap', 'rotationY', { duration: .9, ease: 'power3' });
+    const ry = gsap.quickTo('.rig-wrap', 'rotationX', { duration: .9, ease: 'power3' });
+    addEventListener('pointermove', e => { rx((e.clientX / innerWidth - .5) * 10); ry(-(e.clientY / innerHeight - .5) * 7); });
+  }
+
+  // ---------- мобильная / без анимации ----------
+  function autoplay() {
+    const state = { s: -0.5 };
+    if (!reduced) {
+      const tl = gsap.timeline({ repeat: -1, delay: 1.8 });
+      for (let k = 0; k < N; k++) tl.to(state, { s: k, duration: 1.1, ease: 'power3.inOut' }).to({}, { duration: 1.3 });
+      tl.to(state, { s: N - 0.5, duration: 1.1, ease: 'power3.inOut' });
+      tl.eventCallback("onRepeat", () => { state.s = -0.5; });
+    } else state.s = 0;
+    gsap.ticker.add(() => {
+      const s = state.s + intro.spin;
+      render(s, 0, i => { const d = state.s - i; return d > -0.12 && d < 3; });
+      updateSearch(state.s, 0);
+    });
+  }
+
+  // магнитные кнопки
+  if (!mobile && !reduced) document.querySelectorAll('.magnetic').forEach(b => {
+    const x = gsap.quickTo(b, 'x', { duration: .5, ease: 'power3' }), y = gsap.quickTo(b, 'y', { duration: .5, ease: 'power3' });
+    b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); x((e.clientX - r.left - r.width / 2) * .25); y((e.clientY - r.top - r.height / 2) * .35); });
+    b.addEventListener('pointerleave', () => { x(0); y(0); });
+  });
+
+  addEventListener('resize', () => { layout(); ScrollTrigger.refresh(); });
+
+  const imgs = [...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }));
+  Promise.all([...imgs, document.fonts.ready]).then(() => {
+    layout();
+    (mobile || reduced) ? autoplay() : desktop();
+    playIntro();
+  });
+})();
+</script>
+</body>
+</html>
